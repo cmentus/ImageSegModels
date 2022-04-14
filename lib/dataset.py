@@ -18,8 +18,8 @@ class ImageLabelDataset(Dataset):
         self.target_masks = labels[self.permutation,:,:,:]
         self.transform = transform
         self.rand_rot = rand_rot
-        self.rotate = torchvision.transforms.RandomRotation(180)
-        self.upsample = torchvision.transforms.Resize((256,256))     #nn.Upsample(size=(256,256), mode='bilinear', align_corners=True)
+        self.rotate = transforms.RandomRotation(180)
+        self.upsample = transforms.Resize((256,256))     #nn.Upsample(size=(256,256), mode='bilinear', align_corners=True)
 
 
     def __len__(self):
