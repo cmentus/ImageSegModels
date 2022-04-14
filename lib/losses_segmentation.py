@@ -1,6 +1,9 @@
-import pytorch as torch
+import torch as torch
 import torch.nn as nn
 import torchvision.models
+import numpy as np
+
+
 def uniform_filter(kernel_size,n_channel,padding = None):
     if padding is None:
         uf = nn.Conv2d(n_channel,n_channel, kernel_size= kernel_size,  padding=int(np.round((kernel_size-1)/2)), bias=False)
