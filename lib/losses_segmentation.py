@@ -3,7 +3,7 @@ import torch.nn as nn
 import torchvision.models
 import numpy as np
 
-
+import torch.nn.functional as F
 def uniform_filter(kernel_size,n_channel,padding = None):
     if padding is None:
         uf = nn.Conv2d(n_channel,n_channel, kernel_size= kernel_size,  padding=int(np.round((kernel_size-1)/2)), bias=False)
@@ -13,7 +13,56 @@ def uniform_filter(kernel_size,n_channel,padding = None):
     uf.weight.data = n_channel*uf.weight.data/torch.sum(uf.weight.data)
     return uf
 
+class BlurryDiceLoss(nn.Module):
+    def __init__(self,kernel_size,channels):
+        super( BlurryDiceLoss, self).__init__()
+        self.channels = channels
 
+        self.blurrer = uniform_filter(kernel_size,len(channels))
+        for param in self.blurrer.parameters():
+            param.requires_grad = False
+
+    def forward(self,target,prediction,code):
+         target=target [:,self.channels,:,:]
+         prediction=torch.sigmoid(prediction[:,self.channels,:,:])
+         prediction = self.blurrer(prediction)
+         a=torch.sum(target*prediction,(2,3))
+         b=torch.sum(target*target,(2,3)) 
+         c=torch.sum(prediction*prediction,(2,3))
+         D=(2*a)/(b+c)
+         X=1-D
+         return  torch.sum(X.unsqueeze(2).unsqueeze(3)*code,1)/torch.sum(code)
+
+
+class LogDiceLoss(nn.Module):
+    def __init__(self,kernel_size,channels):
+        super(LogDiceLoss, self).__init__()
+        self.channels = channels
+
+    def forward(self,target,prediction,code):
+         target=target [:,self.channels,:,:]
+         prediction=torch.sigmoid(prediction[:,self.channels,:,:])
+         a=torch.sum(target*prediction,(2,3))
+         b=torch.sum(target*target,(2,3)) 
+         c=torch.sum(prediction*prediction,(2,3))
+         D=(2*a)/(b+c)
+         X=-torch.log(D+1e-9)
+         return  torch.sum(X.unsqueeze(2).unsqueeze(3)*code,1)/torch.sum(code)
+
+class DiceLoss(nn.Module):
+    def __init__(self,kernel_size,channels):
+        super(DiceLoss, self).__init__()
+        self.channels = channels
+
+    def forward(self,target,prediction,code):
+         target=target [:,self.channels,:,:]
+         prediction=torch.sigmoid(prediction[:,self.channels,:,:])
+         a=torch.sum(target*prediction,(2,3))
+         b=torch.sum(target*target,(2,3)) 
+         c=torch.sum(prediction*prediction,(2,3))
+         D=2*a/(b+c)
+         X=1-D
+         return  torch.sum(X.unsqueeze(2).unsqueeze(3)*code,1)/torch.sum(code)
 class BCEBlurLoss(nn.Module):
     def __init__(self,kernel_size,channels):
         super(BCEBlurLoss, self).__init__()
