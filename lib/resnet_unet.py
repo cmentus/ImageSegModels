@@ -103,3 +103,16 @@ class Decoder(nn.Module):
         out = self.conv_last(x)
 
         return out
+
+class EncDecResNetUNet(nn.Module):
+    def __init__(self,n_class=10):
+        super().__init__()
+
+        self.encoder = Encoder()
+        self.decoder = Decoder(n_class = n_class)
+    
+    def forward(self, input):
+        x_original,features0,features1,features2,features3,features4 = self.encoder(input)
+        out = self.decoder(x_original,features0,features1,features2,features3,features4)
+        
+        return out
