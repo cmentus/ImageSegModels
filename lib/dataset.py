@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, datasets, models
 import random
+import numpy as np
 
 def grad_contour(mask):
     #Takes a torch array of size N_data x Channels x Height x Width
