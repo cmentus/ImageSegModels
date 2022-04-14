@@ -2,6 +2,7 @@ import torch as torch
 import torch.nn as nn
 import torchvision.models
 import numpy as np
+import time
 
 def train_model(dataloaders, 
                 model, 
