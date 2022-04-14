@@ -1,4 +1,5 @@
 from torch.utils.data import Dataset, DataLoader
+import torch
 from torchvision import transforms, datasets, models
 import random
 import numpy as np
