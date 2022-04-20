@@ -81,14 +81,17 @@ def train_model(dataloaders,
             # visualization:
             if phase == 'val':
                 if epoch % plot_epoch == 0:
-                    vis_img = img.cpu()[0]
-                    vis_prediction = torch.sigmoid(prediction.cpu()[0])
-                    vis_mask = mask.cpu()[0]
-                    vis_contour = contour.cpu()[0]
-                    visualize(vis_img,vis_prediction,vis_mask,
-                              vis_contour,epoch=epoch,dir=savedir)
+                    #vis_img = img.cpu()[0]
+                    #vis_prediction = torch.sigmoid(prediction.cpu()[0])
+                    #vis_mask = mask.cpu()[0]
+                    #vis_contour = contour.cpu()[0]
+                    #visualize(vis_img,vis_prediction,vis_mask,
+                    #          vis_contour,epoch=epoch,dir=savedir)
+                    #visualize should be a function of input-img, model, ground truth.
+                    #this way we have flexibility to visualize attention fields coming 
+                    #from the model etc.
+                    #Within the visualization function predictions are made instead of before.
 
-                    #TODO: plot metrics 
                     for k,v in train_metrics.items():
                         f, ax = plt.subplots(figsize = (5,5))
                         ax.plot(v,label = 'train')
