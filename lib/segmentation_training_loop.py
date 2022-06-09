@@ -6,6 +6,7 @@ import time
 
 def train_model(dataloaders, 
                 model, 
+                device,
                 num_epochs,
                 lossfn, # function form loss(target,prediction,code)
                 metrics, # dictionary string : f(target,prediction,code) #print metrics, record in dict -> list, plot.
@@ -91,18 +92,7 @@ def train_model(dataloaders,
                     #this way we have flexibility to visualize attention fields coming 
                     #from the model etc.
                     #Within the visualization function predictions are made instead of before.
-
-                    for k,v in train_metrics.items():
-                        f, ax = plt.subplots(figsize = (5,5))
-                        ax.plot(v,label = 'train')
-                        ax.set_xlabel('epochs',fontsize = 10)
-                        ax.set_ylabel(k,fontsize = 10)
-                        ax.set_title(k)
-                        ax.plot(val_metrics[k],label ='val')
-                        ax.set_title(k)
-                        f.legend()
-                        #f.savefig(savedrive +k+ hyperstring+str(epoch)+'.png') #if overriding then remove epoch
-                        f.savefig(savedir+k+'.png') #if overriding then remove epoch
-                
+                    print('here')
+                    visualize(vis_img,vis_prediction,vis_mask,vis_contour,epoch=epoch,dir=savedir)
 
     return model,train_metrics,val_metrics

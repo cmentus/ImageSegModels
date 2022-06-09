@@ -23,15 +23,15 @@ class BlurryDiceLoss(nn.Module):
             param.requires_grad = False
 
     def forward(self,target,prediction,code):
-         target=target [:,self.channels,:,:]
-         prediction=torch.sigmoid(prediction[:,self.channels,:,:])
-         prediction = self.blurrer(prediction)
-         a=torch.sum(target*prediction,(2,3))
-         b=torch.sum(target*target,(2,3)) 
-         c=torch.sum(prediction*prediction,(2,3))
-         D=(2*a)/(b+c)
-         X=1-D
-         return  torch.sum(X.unsqueeze(2).unsqueeze(3)*code,1)/torch.sum(code)
+        target=target[:,self.channels,:,:]
+        prediction=torch.sigmoid(prediction[:,self.channels,:,:])
+        prediction = self.blurrer(prediction)
+        a=torch.sum(target*prediction,(2,3))
+        b=torch.sum(target*target,(2,3)) 
+        c=torch.sum(prediction*prediction,(2,3))
+        D=(2*a)/(b+c)
+        X=1-D
+        return  torch.sum(X.unsqueeze(2).unsqueeze(3)*code,1)/torch.sum(code)
 
 
 class LogDiceLoss(nn.Module):
@@ -40,14 +40,14 @@ class LogDiceLoss(nn.Module):
         self.channels = channels
 
     def forward(self,target,prediction,code):
-         target=target [:,self.channels,:,:]
-         prediction=torch.sigmoid(prediction[:,self.channels,:,:])
-         a=torch.sum(target*prediction,(2,3))
-         b=torch.sum(target*target,(2,3)) 
-         c=torch.sum(prediction*prediction,(2,3))
-         D=(2*a)/(b+c)
-         X=-torch.log(D+1e-9)
-         return  torch.sum(X.unsqueeze(2).unsqueeze(3)*code,1)/torch.sum(code)
+        target=target [:,self.channels,:,:]
+        prediction=torch.sigmoid(prediction[:,self.channels,:,:])
+        a=torch.sum(target*prediction,(2,3))
+        b=torch.sum(target*target,(2,3)) 
+        c=torch.sum(prediction*prediction,(2,3))
+        D=(2*a)/(b+c)
+        X=-torch.log(D+1e-9)
+        return  torch.sum(X.unsqueeze(2).unsqueeze(3)*code,1)/torch.sum(code)
 
 class DiceLoss(nn.Module):
     def __init__(self,kernel_size,channels):
@@ -55,14 +55,15 @@ class DiceLoss(nn.Module):
         self.channels = channels
 
     def forward(self,target,prediction,code):
-         target=target [:,self.channels,:,:]
-         prediction=torch.sigmoid(prediction[:,self.channels,:,:])
-         a=torch.sum(target*prediction,(2,3))
-         b=torch.sum(target*target,(2,3)) 
-         c=torch.sum(prediction*prediction,(2,3))
-         D=2*a/(b+c)
-         X=1-D
-         return  torch.sum(X.unsqueeze(2).unsqueeze(3)*code,1)/torch.sum(code)
+        target=target[:,self.channels,:,:]
+        prediction=torch.sigmoid(prediction[:,self.channels,:,:])
+        a=torch.sum(target*prediction,(2,3))
+        b=torch.sum(target*target,(2,3)) 
+        c=torch.sum(prediction*prediction,(2,3))
+        D=2*a/(b+c)
+        X=1-D
+        return torch.sum(X.unsqueeze(2).unsqueeze(3)*code,1)/torch.sum(code)
+
 class BCEBlurLoss(nn.Module):
     def __init__(self,kernel_size,channels):
         super(BCEBlurLoss, self).__init__()

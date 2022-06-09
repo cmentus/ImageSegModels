@@ -9,10 +9,10 @@ import torch.nn as nn
 import torchvision.models
 
 def convrelu(in_channels, out_channels, kernel, padding):
-  return nn.Sequential(
-    nn.Conv2d(in_channels, out_channels, kernel, padding=padding),
-    nn.ReLU(inplace=True),
-  )
+      return nn.Sequential(
+        nn.Conv2d(in_channels, out_channels, kernel, padding=padding),
+        nn.ReLU(inplace=True),
+      )
 
 
 class Encoder(nn.Module):

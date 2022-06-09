@@ -5,15 +5,15 @@ import numpy as np
 
 
 def convrelu(in_channels, out_channels, kernel, padding):
-  return nn.Sequential(
-    nn.Conv2d(in_channels, out_channels, kernel_size=kernel, padding=padding),
-    nn.ReLU(inplace=True),
-  )
+      return nn.Sequential(
+        nn.Conv2d(in_channels, out_channels, kernel_size=kernel, padding=padding),
+        nn.ReLU(inplace=True),
+      )
 
 def convattn(in_channels,booksize=16,kernel=1, padding=0):
-  return nn.Sequential(
-    nn.Conv2d(in_channels, booksize, kernel_size=kernel, padding=padding,bias = False)
-  )
+      return nn.Sequential(
+        nn.Conv2d(in_channels, booksize, kernel_size=kernel, padding=padding,bias = False)
+      )
 
 
 
@@ -124,89 +124,89 @@ class MultiHeadAttention(nn.Module):
 
 
 class ResNetUNet(nn.Module):
-  def __init__(self, n_class=5):
-    super().__init__()
-    
-    self.downsize = torchvision.transforms.Resize((32,32),interpolation = transforms.functional.InterpolationMode('nearest'))
-    self.layer1 = convrelu(3, 64, 1, 0)
-    self.layer1b = nn.Conv2d(64,20,kernel_size=1,padding=0)
+      def __init__(self, n_class=5):
+        super().__init__()
 
-    self.multihead1 = MultiHeadAttention(64,16,4,radius=32)#radius=[1.2]*4+[2]*4+[3]*4+[4]*3+[8])
-    self.layer_norm2 = nn.BatchNorm2d(64,affine=False)
+        self.downsize = torchvision.transforms.Resize((32,32),interpolation = transforms.functional.InterpolationMode('nearest'))
+        self.layer1 = convrelu(3, 64, 1, 0)
+        self.layer1b = nn.Conv2d(64,20,kernel_size=1,padding=0)
 
-    self.layer2 = convrelu(64, 32, 1, 0)
+        self.multihead1 = MultiHeadAttention(64,16,4,radius=32)#radius=[1.2]*4+[2]*4+[3]*4+[4]*3+[8])
+        self.layer_norm2 = nn.BatchNorm2d(64,affine=False)
 
-    self.resize2 = torchvision.transforms.Resize((8,8),interpolation = transforms.functional.InterpolationMode('nearest'))
+        self.layer2 = convrelu(64, 32, 1, 0)
 
-
-    self.multihead_small = MultiHeadAttention(32,4,2,radius=32,side=8)#radius=[1,2,2,4],side=8)
-    self.layer_norm_small = nn.BatchNorm2d(32,affine=False)
-    self.layer_mid = convrelu(32,16,1,0)
+        self.resize2 = torchvision.transforms.Resize((8,8),interpolation = transforms.functional.InterpolationMode('nearest'))
 
 
-    self.resize3 = torchvision.transforms.Resize((32,32),interpolation = transforms.functional.InterpolationMode('nearest'))
-
-    
-    self.multihead2 = MultiHeadAttention(48,8,4,radius=32)#radius=[2]*2+[4]*2+[6]*2+[8]*2)
-    self.layer_norm3 = nn.BatchNorm2d(48,affine=False)
-    self.layer3 = convrelu(48,20,1,0)
-
-    
-    self.multihead3 = MultiHeadAttention(40,5,4,radius=32)#radius=[2]+[4]*2+[6]+[8])
-    self.layer_norm4 = nn.BatchNorm2d(40,affine=False)
-    self.layer4 = convrelu(40,20,1,0)
-
-    self.self_attention =SelfAttention(20,5,radius=32)
-    self.layer_norm5 = nn.BatchNorm2d(20,affine=False)
-    self.layer5 = convrelu(20,5,1,0)
+        self.multihead_small = MultiHeadAttention(32,4,2,radius=32,side=8)#radius=[1,2,2,4],side=8)
+        self.layer_norm_small = nn.BatchNorm2d(32,affine=False)
+        self.layer_mid = convrelu(32,16,1,0)
 
 
-    self.upsample_full = torchvision.transforms.Resize((256,256),interpolation = transforms.functional.InterpolationMode('nearest'))
-
-  def forward(self, input):
-    input= input.float()
-    x = input
-    #x = self.res_layer(x)
-    x=self.layer1(x)
-    x = self.downsize(x)
-    
-    x1 = self.layer1b(x)
-
-    attn = self.multihead1(x)
+        self.resize3 = torchvision.transforms.Resize((32,32),interpolation = transforms.functional.InterpolationMode('nearest'))
 
 
-    x = self.layer_norm2(x+attn)
-    x2 = self.layer2(x)
-    x = self.resize2(x2)
-
-    attn = self.multihead_small(x)
-    x = self.layer_norm_small(x+attn)
-    x = self.layer_mid(x)
-
-    x = self.resize3(x)
-
-    x = torch.cat([x,x2],dim=1)
-
-    
-    attn = self.multihead2(x)
-    x = self.layer_norm3(x+attn)
-    x = self.layer3(x)
-
-    
-    x = torch.cat([x,x1],dim=1)
-    attn = self.multihead3(x)
-    x = self.layer_norm4(x+attn)
-    x = self.layer4(x)
-
-    attn,key_query = self.self_attention.forward_kq(x)
-    x = self.layer_norm5(x+attn)
-    x = self.layer5(x)
-
-    out = torch.sigmoid(self.upsample_full(x))
-    ycoord = int(random.randint(0,31))
-    xcoord = int(random.randint(0,31))
+        self.multihead2 = MultiHeadAttention(48,8,4,radius=32)#radius=[2]*2+[4]*2+[6]*2+[8]*2)
+        self.layer_norm3 = nn.BatchNorm2d(48,affine=False)
+        self.layer3 = convrelu(48,20,1,0)
 
 
-    all_attn = key_query[:,:,:,ycoord,xcoord].view(-1,32,32)
-    
-    return out,all_attn, (ycoord,xcoord)
+        self.multihead3 = MultiHeadAttention(40,5,4,radius=32)#radius=[2]+[4]*2+[6]+[8])
+        self.layer_norm4 = nn.BatchNorm2d(40,affine=False)
+        self.layer4 = convrelu(40,20,1,0)
+
+        self.self_attention =SelfAttention(20,5,radius=32)
+        self.layer_norm5 = nn.BatchNorm2d(20,affine=False)
+        self.layer5 = convrelu(20,5,1,0)
+
+
+        self.upsample_full = torchvision.transforms.Resize((256,256),interpolation = transforms.functional.InterpolationMode('nearest'))
+
+      def forward(self, input):
+        input= input.float()
+        x = input
+        #x = self.res_layer(x)
+        x=self.layer1(x)
+        x = self.downsize(x)
+
+        x1 = self.layer1b(x)
+
+        attn = self.multihead1(x)
+
+
+        x = self.layer_norm2(x+attn)
+        x2 = self.layer2(x)
+        x = self.resize2(x2)
+
+        attn = self.multihead_small(x)
+        x = self.layer_norm_small(x+attn)
+        x = self.layer_mid(x)
+
+        x = self.resize3(x)
+
+        x = torch.cat([x,x2],dim=1)
+
+
+        attn = self.multihead2(x)
+        x = self.layer_norm3(x+attn)
+        x = self.layer3(x)
+
+
+        x = torch.cat([x,x1],dim=1)
+        attn = self.multihead3(x)
+        x = self.layer_norm4(x+attn)
+        x = self.layer4(x)
+
+        attn,key_query = self.self_attention.forward_kq(x)
+        x = self.layer_norm5(x+attn)
+        x = self.layer5(x)
+
+        out = torch.sigmoid(self.upsample_full(x))
+        ycoord = int(random.randint(0,31))
+        xcoord = int(random.randint(0,31))
+
+
+        all_attn = key_query[:,:,:,ycoord,xcoord].view(-1,32,32)
+
+        return out,all_attn, (ycoord,xcoord)
